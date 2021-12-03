@@ -34,7 +34,7 @@ class NewReleaseCollectionViewCell: UICollectionViewCell {
     }()
     let numberOfTracksLabel : UILabel = {
         let label  = UILabel()
-        label.numberOfLines = 0
+        label.numberOfLines = 1
         label.font = .systemFont(ofSize: 18, weight: .thin)
         return label
     }()
@@ -79,7 +79,7 @@ class NewReleaseCollectionViewCell: UICollectionViewCell {
         numberOfTracksLabel.frame = CGRect(x: albumCoverImageView.right + 10,
                                            y: contentView.bottom - 40,
                                            width: numberOfTracksLabel.width,
-                                           height: 44)
+                                           height: 48)
     }
     
     override func prepareForReuse() {

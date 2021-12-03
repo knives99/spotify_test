@@ -9,12 +9,27 @@ import UIKit
 
 enum BrowseSectionType{
     case newReleases(viewModels:[NewReleasesCellViewModel])
-    case featuredPlaylists(viewModels:[NewReleasesCellViewModel])
-    case recommendedTracks(viewModels:[NewReleasesCellViewModel])
+    case featuredPlaylists(viewModels:[FeaturedPlaylistCellViewModel])
+    case recommendedTracks(viewModels:[RecommendedTrackCellViewModel])
+    
+    var title:String{
+        switch self {
+        case .newReleases(let viewModels):
+            return "New Release"
+        case .featuredPlaylists(let viewModels):
+            return "Featured"
+        case .recommendedTracks(let viewModels):
+            return "Recommended"
+        }
+    }
     
 }
 
 class HomeViewController: UIViewController {
+    
+    var newAlbums = [Album]()
+    var playlists = [Playlist]()
+    var tracks = [AudioTrack]()
     
     
     let collectionView :UICollectionView = UICollectionView(frame: .zero,
@@ -48,6 +63,7 @@ class HomeViewController: UIViewController {
         collectionView.register(NewReleaseCollectionViewCell.self, forCellWithReuseIdentifier: NewReleaseCollectionViewCell.identifier)
         collectionView.register(FeaturedPlaylistCollectionViewCell.self, forCellWithReuseIdentifier: FeaturedPlaylistCollectionViewCell.identifier)
         collectionView.register(RecommendedTrackCollectionViewCell.self, forCellWithReuseIdentifier: RecommendedTrackCollectionViewCell.identifier)
+        collectionView.register(TitleHeaderCollectionReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: TitleHeaderCollectionReusableView.identifier)
         
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -124,8 +140,10 @@ class HomeViewController: UIViewController {
             }
         }
         
+
+        
+        
         group.notify(queue: .main) {
-            print("GROUP NOTIFY")
 //            guard let newAlbums = newRelease?.albums.items,
 //                  let playlists = featuredPlaylistsResponse?.playlists.items,
 //                  let tracks = recommendationsResponse?.tracks else{
@@ -136,18 +154,35 @@ class HomeViewController: UIViewController {
                 return}
             guard let tracks = recommendationsResponse?.tracks else{assertionFailure()
                 return}
+            
+            self.newAlbums = newAlbums
+            self.playlists = playlists
+            self.tracks = tracks
             self.configureModels(newAlbums: newAlbums, playlits: playlists, tracks: tracks)
         }
     }
     
     private func configureModels(newAlbums:[Album],playlits:[Playlist],tracks:[AudioTrack]){
-                //Configure Models
+        //Configure Models
         let albumModels = newAlbums.compactMap { album in
-           return NewReleasesCellViewModel(name: album.name, artworkURL: URL(string: album.images.first?.url ?? ""), numberOfTracks: album.total_tracks, artistName: album.artists.first?.name ?? "_" )
+            return NewReleasesCellViewModel(name: album.name,
+                                            artworkURL: URL(string: album.images.first?.url ?? ""),
+                                            numberOfTracks: album.total_tracks,
+                                            artistName: album.artists.first?.name ?? "_" )
         }
-                sections.append(.newReleases(viewModels: albumModels))
-                sections.append(.featuredPlaylists(viewModels: []))
-                sections.append(.recommendedTracks(viewModels: []))
+        sections.append(.newReleases(viewModels: albumModels))
+        
+        sections.append(.featuredPlaylists(viewModels: playlits.compactMap({
+            return FeaturedPlaylistCellViewModel(name: $0.name,
+                                                 artworkURL: URL(string: $0.images.first?.url ?? ""),
+                                                 creatorName: $0.owner.display_name)
+        })))
+        
+        sections.append(.recommendedTracks(viewModels: tracks.compactMap({
+            return RecommendedTrackCellViewModel(name: $0.name,
+                                                 artistName: $0.artists.first?.name ?? "",
+                                                 artworkURL: URL(string: $0.album?.images.first?.url ?? ""))
+        })))
         collectionView.reloadData()
     }
     
@@ -186,6 +221,16 @@ extension HomeViewController: UICollectionViewDelegate,UICollectionViewDataSourc
         }
     
     }
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        guard kind == UICollectionView.elementKindSectionHeader else {return UICollectionReusableView()}
+        
+        
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: TitleHeaderCollectionReusableView.identifier, for: indexPath) as! TitleHeaderCollectionReusableView
+    
+        header.configure(with: sections[indexPath.section].title)
+        
+        return header
+    }
     
 
     
@@ -198,19 +243,52 @@ extension HomeViewController: UICollectionViewDelegate,UICollectionViewDataSourc
             let viewmodel = viewmodels[indexPath.row]
             cell.configure(with: viewmodel)
             return cell
-        case.recommendedTracks(let viewmodels):
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecommendedTrackCollectionViewCell.identifier, for: indexPath) as! RecommendedTrackCollectionViewCell
-            cell.backgroundColor = .systemGreen
-            return cell
+            
         case.featuredPlaylists(let viewmodels):
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FeaturedPlaylistCollectionViewCell.identifier, for: indexPath) as! FeaturedPlaylistCollectionViewCell
-            cell.backgroundColor = .systemPink
+            
+            let viewModel = viewmodels[indexPath.row]
+            cell.configure(with: viewModel)
             return cell
 
+        case.recommendedTracks(let viewmodels):
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecommendedTrackCollectionViewCell.identifier, for: indexPath) as! RecommendedTrackCollectionViewCell
+            let viewModel = viewmodels[indexPath.row]
+            cell.configure(with: viewModel)
+            return cell
+
+        }
+        
+    
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        let type = sections[indexPath.section]
+        switch type{
+        case.newReleases:
+            let album = newAlbums[indexPath.row]
+            let vc = AlbumViewController(album: album)
+            vc.navigationItem.largeTitleDisplayMode = .never
+            navigationController?.pushViewController(vc, animated: true)
+            
+        case.featuredPlaylists:
+            let playlist = playlists[indexPath.row]
+            let vc = PlayListViewController(playlist: playlist)
+            navigationItem.largeTitleDisplayMode = .never
+            navigationItem.title = playlist.name
+            navigationController?.pushViewController(vc, animated: true)
+        case.recommendedTracks:break
+            
         }
     }
     
     static func createSectionLayout(section:Int) -> NSCollectionLayoutSection{
+        let headerView = [NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(50)),
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top)]
         switch section{
         case 0 :
             //itme
@@ -231,6 +309,7 @@ extension HomeViewController: UICollectionViewDelegate,UICollectionViewDataSourc
             //section
             let section = NSCollectionLayoutSection(group: horizontalGroup)
             section.orthogonalScrollingBehavior = .groupPaging
+            section.boundarySupplementaryItems = headerView
             return section
             
         case 1:
@@ -255,6 +334,7 @@ extension HomeViewController: UICollectionViewDelegate,UICollectionViewDataSourc
             //section
             let section = NSCollectionLayoutSection(group: horizontalGroup)
             section.orthogonalScrollingBehavior = .continuous
+            section.boundarySupplementaryItems = headerView
             return section
             
         case 2:
@@ -272,6 +352,7 @@ extension HomeViewController: UICollectionViewDelegate,UICollectionViewDataSourc
             
             //section
             let section = NSCollectionLayoutSection(group: group)
+            section.boundarySupplementaryItems = headerView
             return section
             
  
@@ -289,6 +370,7 @@ extension HomeViewController: UICollectionViewDelegate,UICollectionViewDataSourc
             //section
             let section = NSCollectionLayoutSection(group: group)
             section.orthogonalScrollingBehavior = .groupPaging
+            section.boundarySupplementaryItems = headerView
             return section
         }
     }
