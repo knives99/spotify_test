@@ -212,7 +212,34 @@ final class APICaller{
             task.resume()
         }
     }
+//MARK: - Search
+    public func getSearch(with query:String,completion:@escaping (Result<[SearchResult],Error>)->Void){
+        createRequest(with: URL(string: Constants.baseAPIURL + "/search" + "?type=track,artist,album,playlist,show,episode&q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&limit=20" ), type: .GET) { request in
+            let task  = URLSession.shared.dataTask(with: request) { data, _, error in
+                guard let data = data,error == nil else {
+                    completion(.failure(APIError.failedToGetData))
+                    return
+                }
+                
+                do {
+                    let result = try JSONDecoder().decode(SearchResultsResponse.self, from: data)
+                    var searchResult = [SearchResult]()
+//                    let result = try JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed)
+                    searchResult.append(contentsOf: result.albums.items.compactMap({SearchResult.album(model: $0)}))
+                    searchResult.append(contentsOf: result.playlists.items.compactMap({SearchResult.playlist(model: $0)}))
+                    searchResult.append(contentsOf: result.artists.items.compactMap({SearchResult.artist(model: $0)}))
+                    searchResult.append(contentsOf: result.tracks.items.compactMap({SearchResult.track(model: $0)}))
+                    completion(.success(searchResult))
+                }catch{
+                    print(error)
+                    completion(.failure(error))
+                }
 
+            }
+            task.resume()
+        }
+        
+    }
     
     //MARK: - Private
     
