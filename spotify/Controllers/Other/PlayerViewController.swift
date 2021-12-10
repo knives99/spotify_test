@@ -66,6 +66,10 @@ class PlayerViewController: UIViewController {
     
     @objc private func didTapAction(){}
     
+    func refreshUI(){
+        configure()
+    }
+    
 
  
 }
@@ -80,7 +84,7 @@ extension PlayerViewController : PlayerControlsViewDelegate {
     }
     
     func PlayerControlsViewDidTapForwardButton(_ playerControlsView: PlayerControlsView) {
-        
+        delegate?.didTapForward()
     }
     
     func PlayerControlsViewDidTapBackwardsButton(_ playerControlsView: PlayerControlsView) {

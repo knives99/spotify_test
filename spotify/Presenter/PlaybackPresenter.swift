@@ -23,25 +23,29 @@ final class PlaybackPresenter {
     private var track :AudioTrack?
     private var tracks = [AudioTrack]()
     
+    var index = 0
+    
 
     
     var currentTrack :AudioTrack?{
         if let track = track, tracks.isEmpty{
             return track
         }else if let player = self.playerQueue, !tracks.isEmpty{
-            let item = player.currentItem
-            let items = player.items()
-            guard let index = items.firstIndex(where: {$0 == item}) else {return nil}
             return tracks[index]
         }
         return nil
     }
     
+    var playerVC : PlayerViewController?
     var player : AVPlayer?
     var playerQueue :AVQueuePlayer?
     
     func startPlayback (form controller:UIViewController, track :AudioTrack){
-        guard let url = URL(string: track.preview_url ?? "") else {return}
+        guard let url = URL(string: track.preview_url ?? "") else {
+            let alert = UIAlertController(title: "Can not play", message: "No music for preview", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "cancel", style: .cancel, handler: nil))
+            controller.present(alert, animated: true, completion: nil)
+            return}
         player = AVPlayer(url: url)
         player?.volume = 0.1
         let vc = PlayerViewController()
@@ -55,10 +59,13 @@ final class PlaybackPresenter {
             [weak self]  in
             self?.player?.play()
         }
+        self.playerVC = vc
     }
     
     func startPlayback (form controller:UIViewController, tracks :[AudioTrack]){
-        let vc = PlayerViewController()
+        self.tracks = tracks
+        self.track = nil
+
         let items : [AVPlayerItem] = tracks.compactMap({
             guard let url = URL(string: $0.preview_url ?? "") else {return nil}
             return AVPlayerItem(url: url)
@@ -66,12 +73,14 @@ final class PlaybackPresenter {
         self.playerQueue = AVQueuePlayer(items: items)
         self.playerQueue?.volume = 0
         self.playerQueue?.play()
-        self.tracks = tracks
-        self.track = nil
+        
+        let vc = PlayerViewController()
         vc.dataSource = self
         vc.delegate = self
         controller.present(vc, animated: true, completion: nil)
+        self.playerVC = vc
     }
+    
 }
 
 
@@ -113,12 +122,11 @@ extension PlaybackPresenter:  PlayerViewControllerDelegate{
     func didTapForward() {
         if tracks.isEmpty{
             player?.pause()
-        }else if let firstItem = playerQueue?.items().first{
-            playerQueue?.pause()
-            playerQueue?.removeAllItems()
-            playerQueue = AVQueuePlayer(items: [firstItem])
-            playerQueue?.play()
-            playerQueue?.volume = 0
+        }else if let  player = playerQueue {
+            player.advanceToNextItem()
+            index += 1
+            print(index)
+            playerVC?.refreshUI()
         }
     }
     
@@ -126,8 +134,12 @@ extension PlaybackPresenter:  PlayerViewControllerDelegate{
         if tracks.isEmpty{
             player?.pause()
             player?.play()
-        }else if let player = playerQueue{
-            player.advanceToNextItem()
+        }else if let firstItem = playerQueue?.items().first{
+            playerQueue?.pause()
+            playerQueue?.removeAllItems()
+            playerQueue = AVQueuePlayer(items: [firstItem])
+            playerQueue?.play()
+            playerQueue?.volume = 0
             
         }
     }
