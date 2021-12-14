@@ -55,6 +55,37 @@ class HomeViewController: UIViewController {
         configureCollectionView()
         view.addSubview(spinner)
         fetchDate()
+        addlongTapGesture()
+        
+    }
+    
+    private func addlongTapGesture(){
+        let gesture = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress(_:)))
+        collectionView.addGestureRecognizer(gesture)
+        collectionView.isUserInteractionEnabled = true
+    }
+    
+    @objc private func didLongPress(_ gesture:UILongPressGestureRecognizer){
+        guard gesture.state == .began else {
+            return
+        }
+        let touchPoint = gesture.location(in: collectionView)
+        guard let index = collectionView.indexPathForItem(at: touchPoint),
+              index.section == 2 else{return}
+        let model = tracks[index.row]
+        let actionSheet = UIAlertController(title: model.name, message: "Would you like to add this to plylist", preferredStyle: .actionSheet)
+        actionSheet.addAction(UIAlertAction(title: "cancel", style: .cancel, handler: nil))
+        actionSheet.addAction(UIAlertAction(title: "Add to playlist", style: .default,handler: { [weak self] _ in
+            let vc = LibraryPlaylistsViewController()
+            vc.selectionHandler = {playlist in
+                APICaller.shared.addTrackToPlaylist(track: model, playlist: playlist) { success in
+                    print("Add to playlist success \(success)")
+                }
+            }
+            vc.title = "Select Playlist"
+            self?.present(UINavigationController(rootViewController: vc), animated: true, completion: nil)
+        }))
+        present(actionSheet, animated: true, completion: nil)
         
     }
     
@@ -68,6 +99,7 @@ class HomeViewController: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.backgroundColor = .systemBackground
+        
         view.addSubview(collectionView)
     }
     
@@ -265,6 +297,7 @@ extension HomeViewController: UICollectionViewDelegate,UICollectionViewDataSourc
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
+        HapticsManager.shared.vibrateForSelection()
         let type = sections[indexPath.section]
         switch type{
         case.newReleases:

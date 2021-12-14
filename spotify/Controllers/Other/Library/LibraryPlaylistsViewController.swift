@@ -13,6 +13,8 @@ class LibraryPlaylistsViewController: UIViewController {
     
     private let noPlaylistsView = ActionLabelView()
     
+    public var selectionHandler:((Playlist)->Void)?
+    
     private let tableView:UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.register(SearchResultSubtitleTableViewCell.self, forCellReuseIdentifier: SearchResultSubtitleTableViewCell.identifier)
@@ -28,6 +30,14 @@ class LibraryPlaylistsViewController: UIViewController {
         view.addSubview(tableView)
         setUpNoPlaylistsView()
         fetchData()
+        
+        if selectionHandler != nil {
+            navigationItem.leftBarButtonItem  = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(didTapClose))
+        }
+    }
+    
+    @objc func didTapClose(){
+        dismiss(animated: true, completion: nil)
     }
     
     override func viewDidLayoutSubviews() {
@@ -84,10 +94,13 @@ class LibraryPlaylistsViewController: UIViewController {
                   !text.trimmingCharacters(in: .whitespaces).isEmpty else{
                       return
                   }
-            APICaller.shared.createPlaylist(with: text) { success in
+            APICaller.shared.createPlaylist(with: text) { [weak self] success in
                 if success{
                     //refresh lis of playlists
+                    HapticsManager.shared.vibrate(for: .success)
+                    self?.fetchData()
                 }else{
+                    HapticsManager.shared.vibrate(for: .error)
                     print("Failed to create playlist")
                 }
             }
@@ -125,6 +138,22 @@ extension LibraryPlaylistsViewController: UITableViewDelegate, UITableViewDataSo
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 70
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        HapticsManager.shared.vibrateForSelection()
+        let playlist = playlists[indexPath.row]
+        guard selectionHandler == nil else{
+            selectionHandler?(playlist)
+            dismiss(animated: true, completion: nil)
+            return
+        }
+      
+        let vc = PlayListViewController(playlist: playlist)
+        vc.navigationItem.largeTitleDisplayMode = .never
+        navigationController?.pushViewController(vc, animated: true)
+        vc.isOwner = true
     }
 
     

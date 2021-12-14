@@ -75,12 +75,10 @@ class PlayerViewController: UIViewController {
 }
 
 extension PlayerViewController : PlayerControlsViewDelegate {
-    func PlayerControlsViewDidSlideVolume(_ playerControlsView: PlayerControlsView) {
-        
-    }
+
     
     func PlayerControlsViewDidTapPlayPauseButton(_ playerControlsView: PlayerControlsView) {
-        
+        delegate?.didTapPlayPause()
     }
     
     func PlayerControlsViewDidTapForwardButton(_ playerControlsView: PlayerControlsView) {
@@ -88,7 +86,7 @@ extension PlayerViewController : PlayerControlsViewDelegate {
     }
     
     func PlayerControlsViewDidTapBackwardsButton(_ playerControlsView: PlayerControlsView) {
-        
+        delegate?.didTapBackward()
     }
     func PlayerControlsView(_ playerControlsView:PlayerControlsView,didSlideSlider value:Float){
         delegate?.didSlideSlider(value)

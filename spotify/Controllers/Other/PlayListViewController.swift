@@ -13,6 +13,7 @@ class PlayListViewController: UIViewController {
     
     private var viewModels  = [RecommendedTrackCellViewModel]()
     private var tracks = [AudioTrack]()
+    public var isOwner = false
     
     private let collectionView = UICollectionView(frame: .zero,
                                                   collectionViewLayout: UICollectionViewCompositionalLayout(sectionProvider: { _, _ in
@@ -59,24 +60,61 @@ class PlayListViewController: UIViewController {
         collectionView.dataSource = self
         view.backgroundColor = .secondarySystemBackground
         APICaller.shared.getDetailPlaylist(with: playlist) {[weak self] result in
-            DispatchQueue.main.async {
-                switch result{
-                case.success(let models):
-                    self?.tracks = models.tracks.items.compactMap({$0.track})
-                    self?.viewModels = models.tracks.items.compactMap({
-                    RecommendedTrackCellViewModel(name: $0.track.name,
-                                                  artistName: $0.track.artists.first?.name ?? "-",
-                                                  artworkURL: URL(string: $0.track.album?.images.first?.url ?? ""))
-                    })
+            
+            switch result{
+            case.success(let models):
+                self?.tracks = models.tracks.items.compactMap({$0.track})
+                self?.viewModels = models.tracks.items.compactMap({
+                RecommendedTrackCellViewModel(name: $0.track.name,
+                                              artistName: $0.track.artists.first?.name ?? "-",
+                                              artworkURL: URL(string: $0.track.album?.images.first?.url ?? ""))
+                })
+                
+                DispatchQueue.main.async {
                     self?.collectionView.reloadData()
-                    
-                case.failure(let error):
-                    print(error.localizedDescription)
-                    
                 }
+         
+                
+            case.failure(let error):
+                print(error.localizedDescription)
+                
             }
+ 
+
         }
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(didTapShare))
+        let gesture = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress(_:)))
+        collectionView.addGestureRecognizer(gesture)
+    }
+    
+    @objc func didLongPress (_ gesture:UILongPressGestureRecognizer){
+        guard gesture.state == .began else {return}
+        let touchPoint = gesture.location(in: collectionView)
+        guard let indexPath = collectionView.indexPathForItem(at: touchPoint) else{return}
+        let trackTodelete = tracks[indexPath.row]
+        
+        let actionSheet = UIAlertController(title: trackTodelete.name, message: "would  you like to remove this from the playlist?", preferredStyle: .actionSheet)
+        actionSheet.addAction(UIAlertAction(title: "Cncel", style: .cancel, handler: nil))
+        actionSheet.addAction(UIAlertAction(title: "Remove", style: .destructive  ,handler: {[weak self] _ in
+            guard let strongSelf = self else{
+                return
+            }
+            APICaller.shared.removeTrckFromPlaylist(track: trackTodelete, playlist: strongSelf.playlist) { success in
+                if success{
+                    DispatchQueue.main.async {
+                        strongSelf.tracks.remove(at: indexPath.row)
+                        strongSelf.viewModels.remove(at: indexPath.row)
+                        strongSelf.collectionView.reloadData()
+                    }
+                }else{
+                    print("Failed to remove")
+                }
+            }
+        }))
+        
+        
+        present(actionSheet, animated: true, completion: nil)
+        
     }
     
     @objc private func didTapShare(){

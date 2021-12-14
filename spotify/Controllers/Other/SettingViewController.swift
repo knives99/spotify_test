@@ -37,7 +37,22 @@ class SettingViewController: UITabBarController, UITableViewDelegate,UITableView
 
     }
     
-    private func signOutTapped(){}
+    private func signOutTapped(){
+        AuthManager.shared.signOut {[weak self] success in
+            if success {
+                DispatchQueue.main.async {
+
+                    let navVC = UINavigationController(rootViewController: WelcomeViewController())
+                    navVC.viewControllers.first?.navigationItem.largeTitleDisplayMode = .always
+                    navVC.navigationBar.prefersLargeTitles = true
+                    navVC.modalPresentationStyle = .fullScreen
+                    self?.present(navVC, animated: true, completion: {
+                        self?.navigationController?.popToRootViewController(animated: false)
+                    })
+                }
+            }
+        }
+    }
     
     private func viewProfile(){
         let vc = ProfileViewController()
