@@ -12,22 +12,17 @@ Tiktok APP 實作練習，目標掌握coding熟悉度，MVVM架構，OAuth2.0實
 ### 使用語言：Swift 
 
 ### 實踐項目:
-* 影像Controller左右滑動/垂直滑動
+* API GET DELETE POST 使用
 * collectionView頁面
-* 相機功能 
-* 照片預覽
-* 照片上傳
-* 通知介面
+* JSON資料解析
+* Token資料獲取 更新
+
 
 
  
 
 ### 使用功能：
 * UIKit
-* FireBase-Authentication
-* FireBase-Database
-* FireBase-Storage
-* AVfoundation
+* WebKit
 * CollectionView - Compositional Layout 
-* SafariServices
-* Appirater
+
