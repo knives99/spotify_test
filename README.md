@@ -1,7 +1,7 @@
 Spotify APP in swift
 ===
 
-Tiktok APP 實作練習，目標掌握coding熟悉度，MVVM架構，OAuth2.0實作，RestfulAPI資料存取，播放的單例設計模式，。<br>
+Tiktok APP 實作練習，目標掌握coding熟悉度，手刻ＵＩ，MVVM架構，OAuth2.0實作，RestfulAPI資料存取，播放的單例設計模式，。<br>
  <br>
 參考網站：https://courses.iosacademy.io/p/build-spotify-ios-app-swift-2021 <br>
  <br>
