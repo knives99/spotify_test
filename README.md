@@ -26,3 +26,13 @@ Tiktok APP 實作練習，目標掌握coding熟悉度，手刻ＵＩ，MVVM架�
 * WebKit
 * CollectionView - Compositional Layout 
 
+### 個人目錄：
+
+ let group = DispatchGroup()  group.enter()  group.leave()   / HomeViewController  <br>
+ collectionView 標題 / HomeViewController  <br>
+ scrollView / LibraryViewController <br>
+ addChild didMove(toParent: self) /  LibraryViewController <br>
+ modalPresentationStyle = .fullScreen. / WelcomeViewController   <br>
+ WebKit / AuthViewController  <br>
+ 登入成功後擷取url回傳的code  /AuthViewController  <br>
+ delegate / PlayerControlsView.  PlayerViewController.  PlaybackPresenter
