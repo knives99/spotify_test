@@ -42,4 +42,6 @@ Tiktok APP 實作練習，目標掌握coding熟悉度，手刻ＵＩ，MVVM架�
  <br>
  登入成功後擷取url回傳的code  /AuthViewController  <br>
  <br>
- delegate / PlayerControlsView.  PlayerViewController.  PlaybackPresenter
+ delegate / PlayerControlsView.  PlayerViewController.  PlaybackPresenter <br>
+ <br>
+gesture touchPoint / PlayListViewController HomeViewController
