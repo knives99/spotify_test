@@ -29,10 +29,17 @@ Tiktok APP 實作練習，目標掌握coding熟悉度，手刻ＵＩ，MVVM架�
 ### 個人目錄：
 
  let group = DispatchGroup()  group.enter()  group.leave()   / HomeViewController  <br>
+ <br>
  collectionView 標題 / HomeViewController  <br>
+ <br>
  scrollView / LibraryViewController <br>
+ <br>
  addChild didMove(toParent: self) /  LibraryViewController <br>
+ <br>
  modalPresentationStyle = .fullScreen. / WelcomeViewController   <br>
+ <br>
  WebKit / AuthViewController  <br>
+ <br>
  登入成功後擷取url回傳的code  /AuthViewController  <br>
+ <br>
  delegate / PlayerControlsView.  PlayerViewController.  PlaybackPresenter
