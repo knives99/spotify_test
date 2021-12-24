@@ -6,9 +6,9 @@ Tiktok APP 實作練習，目標掌握coding熟悉度，手刻ＵＩ，MVVM架�
 參考網站：https://courses.iosacademy.io/p/build-spotify-ios-app-swift-2021 <br>
  <br>
  
- <img src="https://github.com/knives99/spotify_test/blob/main/pic01.png" width="25%" height="25%"  /><br/>
-  <img src="https://github.com/knives99/spotify_test/blob/main/pic02.png" width="25%" height="25%"  /><br/>
-   <img src="https://github.com/knives99/spotify_test/blob/main/pic03.png" width="25%" height="25%"  /><br/>
+ <img src="https://github.com/knives99/spotify_test/blob/main/pic01.png" width="25%" height="25%"  />
+  <img src="https://github.com/knives99/spotify_test/blob/main/pic02.png" width="25%" height="25%"  />
+   <img src="https://github.com/knives99/spotify_test/blob/main/pic03.png" width="25%" height="25%"  />
 
  
 ## 內容：
