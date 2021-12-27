@@ -77,17 +77,20 @@ final class PlaybackPresenter {
         }
         self.tracks = tracks
         self.track = nil
-        let items : [AVPlayerItem] = tracks.compactMap({
-            guard let url = URL(string: $0.preview_url ?? "") else {return nil}
+        DispatchQueue.global().async {
+            let items : [AVPlayerItem] = tracks.compactMap({
+                guard let url = URL(string: $0.preview_url ?? "") else {return nil}
 
-            return AVPlayerItem(url: url)
-        })
-        DispatchQueue.main.async {
+                return AVPlayerItem(url: url)
+            })
             self.items = items
-            self.playerQueue = AVQueuePlayer(items: items)
-            self.playerQueue?.play()
+     
+        }
 
-            
+        DispatchQueue.main.async {
+
+            self.playerQueue = AVQueuePlayer(items: self.items)
+            self.playerQueue?.play()
             let vc = PlayerViewController()
             vc.dataSource = self
             vc.delegate = self

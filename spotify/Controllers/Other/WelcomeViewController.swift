@@ -9,6 +9,7 @@ import UIKit
 
 class WelcomeViewController: UITabBarController {
     
+
     private let signInButton : UIButton = {
         let button = UIButton()
         button.setTitle("SIgn In with Spotify", for: .normal)
@@ -70,7 +71,6 @@ class WelcomeViewController: UITabBarController {
             DispatchQueue.main.async {
                 self?.handelSignIn(success:success)
             }
-            
         }
         vc.navigationItem.largeTitleDisplayMode = .never
         navigationController?.pushViewController(vc, animated: true)

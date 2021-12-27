@@ -10,11 +10,15 @@ import WebKit
 
 class AuthViewController: UITabBarController, WKNavigationDelegate {
     
+    
+    // 網路頁面
     private let webView:WKWebView = {
         let prefs = WKWebpagePreferences()
         prefs.allowsContentJavaScript = true
+        
         let config = WKWebViewConfiguration()
         config.defaultWebpagePreferences = prefs
+        
         let webView = WKWebView(frame: .zero, configuration: config)
         return webView
     }()
@@ -38,6 +42,7 @@ class AuthViewController: UITabBarController, WKNavigationDelegate {
         webView.frame = view.bounds
     }
 
+    // 页面开始加载时调用
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         guard let url = webView.url else {return}
         
