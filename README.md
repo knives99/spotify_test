@@ -33,7 +33,8 @@ Tiktok APP 實作練習，目標掌握coding熟悉度，手刻ＵＩ，MVVM架�
 ### 使用功能：
 * UIKit
 * WebKit
-* CollectionView - Compositional Layout 
+* CollectionView - Compositional Layout
+* AVFoundation 
 
 ### 個人目錄：
 
